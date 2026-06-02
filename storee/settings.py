@@ -173,8 +173,10 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 if not DEBUG:
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-    MEDIA_ROOT = BASE_DIR / "media"
+    STATIC_ROOT = '/app/staticfiles'
+    MEDIA_ROOT = '/app/media'
+
+DEFAULT_PRODUCT_IMAGE = 'https://placehold.co/600x800/e0e0e0/333?text=No+Image'
 
 MEDIA_URL = "/media/"
 
