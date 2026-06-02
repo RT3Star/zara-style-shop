@@ -17,6 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 from decouple import config
 import os
+import dj_database_url
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -181,3 +182,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "romaxa21023636@gmail.com"
 EMAIL_HOST_PASSWORD = "goggog-8faXdi-kybtib"
 DEFAULT_FROM_EMAIL = "romaxa21023636@gmail.com"
+
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
