@@ -28,6 +28,12 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-default-key-for-dev")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://zara-style-shop-production.up.railway.app',
+    'http://zara-style-shop-production.up.railway.app',
+]
+
+
 ALLOWED_HOSTS = ['*']
 
 
