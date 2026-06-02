@@ -8,7 +8,8 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6">
-        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: auto;">
+        <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ product.name|urlencode }}{% endif %}"
+          alt="{{ product.name }}">
       </div>
       <div class="col-md-6">
         <h1 class="product-title">{{ product.name }}</h1>

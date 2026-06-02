@@ -13,7 +13,9 @@
       <div class="cart-items">
         {% for item in cart_items %}
         <div class="cart-item">
-          <img class="cart-item-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+         <img class="cart-item-img"
+            src="{% if item.product.image %}{{ item.product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ item.product.name|urlencode }}{% endif %}"
+            alt="{{ item.product.name }}">
           <div class="cart-item-details">
             <h4>{{ item.product.name }}</h4>
             {% if item.size %}<p class="cart-item-option">Розмір: {{ item.size }}</p>{% endif %}

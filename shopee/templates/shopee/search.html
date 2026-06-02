@@ -20,7 +20,9 @@
     <div class="products-grid">
       {% for product in products %}
       <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' product.slug %}'">
-        <img class="product-img" src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+       <img class="product-img"
+          src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ product.name|urlencode }}{% endif %}"
+          alt="{{ product.name }}">
         <div class="product-overlay">
           <button class="quick-view-btn add-to-cart-btn" data-id="{{ product.id }}">Додати в кошик</button>
         </div>
