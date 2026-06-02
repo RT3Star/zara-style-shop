@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Пошук: {{ query }}{% endblock %}
+
+{% block content %}
+<div class="catalog-section" style="margin-top: 100px;">
+  <h1 class="section-title">ПОШУК</h1>
+
+  <div class="search-container">
+    <form method="get" action="{% url 'shopee:search' %}" class="search-form-large">
+      <input type="text" name="q" placeholder="Що шукаєте?" value="{{ query }}">
+      <button type="submit">Шукати</button>
+    </form>
+
+    {% if query %}
+    <p class="search-result-count">Знайдено {{ count }} товарів за запитом "{{ query }}"</p>
+    {% endif %}
+
+    <div class="products-grid">
+      {% for product in products %}
+      <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' product.slug %}'">
+        <img class="product-img" src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+        <div class="product-overlay">
+          <button class="quick-view-btn add-to-cart-btn" data-id="{{ product.id }}">Додати в кошик</button>
+        </div>
+        <div class="product-info">
+          <div class="product-title">{{ product.name|truncatechars:35 }}</div>
+          <div class="product-price">{{ product.price }} ₴</div>
+        </div>
+      </div>
+      {% empty %}
+      {% if query %}
+      <p style="text-align: center; grid-column: 1/-1; padding: 4rem;">Нічого не знайдено 😔</p>
+      {% else %}
+      <p style="text-align: center; grid-column: 1/-1; padding: 4rem;">Введіть пошуковий запит</p>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+.search-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.search-form-large {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+.search-form-large input {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+}
+.search-form-large button {
+  padding: 1rem 2rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+.search-result-count {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+</style>
+
+<script>
+document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    addToCart(this.dataset.id, 1);
+  });
+});
+</script>
+{% endblock %}

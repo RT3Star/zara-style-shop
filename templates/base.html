@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{% block title %}ZARA STYLE | Мінімалістичний одяг{% endblock %}</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Bootstrap (тільки для dropdown та базових компонентів) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/zara-style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Хедер ZARA стиль -->
+<header class="site-header" id="siteHeader">
+  <div class="nav-container">
+    <div class="logo"><a href="{% url 'shopee:home' %}">ZARA</a></div>
+    <ul class="nav-links">
+      <li><a href="{% url 'shopee:product_list' %}?gender=F">ЖІНКИ</a></li>
+      <li><a href="{% url 'shopee:product_list' %}?gender=M">ЧОЛОВІКИ</a></li>
+      <li><a href="{% url 'shopee:product_list' %}?gender=K">ДІТИ</a></li>
+      <li><a href="{% url 'shopee:product_list' %}">НОВИНКИ</a></li>
+    </ul>
+    <div class="header-icons">
+      <a href="{% url 'shopee:search' %}" class="icon-link">
+        <i class="fas fa-search"></i>
+      </a>
+      <div class="cart-icon" id="cartIcon">
+        <a href="{% url 'cart:cart_detail' %}" class="icon-link">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cartCountBadge">{{ cart_count|default:0 }}</span>
+        </a>
+      </div>
+      {% if user.is_authenticated %}
+      <div class="dropdown">
+        <a href="#" data-bs-toggle="dropdown" class="icon-link">
+          <i class="fas fa-user"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <!-- Кнопка для адміна (тільки для staff) -->
+          {% if user.is_staff %}
+          <li>
+            <a class="dropdown-item" href="{% url 'shopee:admin_dashboard' %}">
+              <i class="fas fa-chart-line"></i> 📊 АДМІН ПАНЕЛЬ
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          {% endif %}
+          <li><a class="dropdown-item" href="{% url 'usersed:profile' %}">
+            <i class="fas fa-id-card"></i> ПРОФІЛЬ
+          </a></li>
+          <li><a class="dropdown-item" href="{% url 'orders:order_list' %}">
+            <i class="fas fa-box"></i> ЗАМОВЛЕННЯ
+          </a></li>
+          <li><a class="dropdown-item" href="{% url 'usersed:change_password' %}">
+            <i class="fas fa-key"></i> ЗМІНИТИ ПАРОЛЬ
+          </a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <form method="post" action="{% url 'usersed:logout' %}">
+              {% csrf_token %}
+              <button class="dropdown-item" type="submit">
+                <i class="fas fa-sign-out-alt"></i> ВИЙТИ
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+      {% else %}
+      <a href="{% url 'usersed:login' %}" class="icon-link">
+        <i class="fas fa-user"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<!-- Flash повідомлення -->
+{% if messages %}
+<div class="container mt-5 pt-4">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Основний контент -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Футер ZARA стиль -->
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <h5>ДОПОМОГА</h5>
+        <ul>
+          <li><a href="#">Доставка</a></li>
+          <li><a href="#">Оплата</a></li>
+          <li><a href="#">Повернення</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h5>ПРО НАС</h5>
+        <ul>
+          <li><a href="#">Про компанію</a></li>
+          <li><a href="#">Контакти</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h5>СОЦМЕРЕЖІ</h5>
+        <ul>
+          <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+          <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 ZARA STYLE. ВСІ ПРАВА ЗАХИЩЕНІ.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/zara-main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

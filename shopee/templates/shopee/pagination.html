@@ -1,0 +1,66 @@
+{% if products.has_other_pages %}
+<div class="pagination-container">
+  <div class="pagination">
+    {% if products.has_previous %}
+    <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn first">
+      &laquo;&laquo;
+    </a>
+    <a href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn prev">
+      &laquo;
+    </a>
+    {% endif %}
+
+    {% for num in products.paginator.page_range %}
+      {% if products.number == num %}
+      <span class="page-btn active">{{ num }}</span>
+      {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+      <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn">
+        {{ num }}
+      </a>
+      {% endif %}
+    {% endfor %}
+
+    {% if products.has_next %}
+    <a href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn next">
+      &raquo;
+    </a>
+    <a href="?page={{ products.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-btn last">
+      &raquo;&raquo;
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.pagination-container {
+  margin-top: 3rem;
+  text-align: center;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.page-btn {
+  display: inline-block;
+  min-width: 40px;
+  padding: 0.5rem 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  color: #666;
+  font-size: 0.8rem;
+  border: 1px solid #eee;
+  transition: all 0.2s;
+}
+.page-btn:hover {
+  background: #f5f5f5;
+  border-color: #ddd;
+}
+.page-btn.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+</style>
+{% endif %}

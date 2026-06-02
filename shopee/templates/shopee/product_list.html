@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Каталог{% endblock %}
+
+{% block content %}
+<div class="catalog-section" style="margin-top: 100px;">
+  <h1 class="section-title">КАТАЛОГ</h1>
+
+  <div class="row">
+    <!-- Фільтри (сайдбар) -->
+    <div class="col-md-3">
+      <div class="filters-sidebar">
+        <h4>Фільтри</h4>
+        <form method="get" id="filter-form">
+          <!-- Сортування -->
+          <div class="filter-group">
+            <label>Сортувати за:</label>
+            <select name="sort" class="filter-select" onchange="this.form.submit()">
+              <option value="-created_at" {% if current_filters.sort == '-created_at' %}selected{% endif %}>Новинки</option>
+              <option value="price" {% if current_filters.sort == 'price' %}selected{% endif %}>Ціна (зростання)</option>
+              <option value="-price" {% if current_filters.sort == '-price' %}selected{% endif %}>Ціна (спадання)</option>
+              <option value="-views_count" {% if current_filters.sort == '-views_count' %}selected{% endif %}>Популярні</option>
+            </select>
+          </div>
+
+          <!-- Ціна -->
+          <div class="filter-group">
+            <label>Ціна:</label>
+            <div class="price-range">
+              <input type="number" name="min_price" placeholder="від" value="{{ current_filters.min_price }}">
+              <span>-</span>
+              <input type="number" name="max_price" placeholder="до" value="{{ current_filters.max_price }}">
+            </div>
+          </div>
+
+          <!-- Стать -->
+          <div class="filter-group">
+            <label>Для кого:</label>
+            <select name="gender" class="filter-select" onchange="this.form.submit()">
+              <option value="">Всі</option>
+              <option value="M" {% if current_filters.gender == 'M' %}selected{% endif %}>Чоловіки</option>
+              <option value="F" {% if current_filters.gender == 'F' %}selected{% endif %}>Жінки</option>
+              <option value="U" {% if current_filters.gender == 'U' %}selected{% endif %}>Унісекс</option>
+            </select>
+          </div>
+
+          <!-- Наявність -->
+          <div class="filter-group checkbox">
+            <label>
+              <input type="checkbox" name="in_stock" value="true" {% if current_filters.in_stock == 'true' %}checked{% endif %} onchange="this.form.submit()">
+              <span>Тільки в наявності</span>
+            </label>
+          </div>
+
+          <button type="submit" class="filter-apply">Застосувати</button>
+          <a href="{% url 'shopee:product_list' %}" class="filter-reset">Скинути</a>
+        </form>
+      </div>
+    </div>
+
+    <!-- Товари -->
+    <div class="col-md-9">
+      <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' product.slug %}'">
+          <img class="product-img"
+               src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ product.name|urlencode }}{% endif %}"
+               alt="{{ product.name }}"
+               loading="lazy">
+          {% if product.discount_price %}
+          <div class="sale-badge">-{{ product.discount_percent }}%</div>
+          {% endif %}
+          <div class="product-overlay">
+            <button class="quick-view-btn add-to-cart-btn" data-id="{{ product.id }}">Додати в кошик</button>
+          </div>
+          <div class="product-info">
+            <div class="product-title">{{ product.name|truncatechars:35 }}</div>
+            <div class="product-price">
+              {% if product.discount_price %}
+                <span style="font-weight: 600;">{{ product.discount_price }} ₴</span>
+                <span style="text-decoration: line-through; color: #999;">{{ product.price }} ₴</span>
+              {% else %}
+                {{ product.price }} ₴
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p style="text-align: center; grid-column: 1/-1; padding: 4rem;">Товарів не знайдено</p>
+        {% endfor %}
+      </div>
+
+      <!-- Пагінація -->
+      {% include 'shopee/pagination.html' %}
+    </div>
+  </div>
+</div>
+
+<style>
+.filters-sidebar {
+  background: #fff;
+  padding: 1.5rem;
+  border: 1px solid #eee;
+  position: sticky;
+  top: 100px;
+}
+.filters-sidebar h4 {
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #000;
+  display: inline-block;
+}
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+.filter-group label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+.filter-select, .filter-group input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+}
+.price-range {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.price-range input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+}
+.filter-apply, .filter-reset {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 0.5rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+}
+.filter-reset {
+  background: transparent;
+  color: #999;
+  border: 1px solid #ddd;
+}
+.sale-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #000;
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  z-index: 5;
+}
+</style>
+
+<script>
+document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    addToCart(this.dataset.id, 1);
+  });
+});
+</script>
+{% endblock %}

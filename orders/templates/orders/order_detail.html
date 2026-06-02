@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Замовлення #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="order-detail-page" style="margin-top: 120px;">
+  <div class="container">
+    <a href="{% url 'orders:order_list' %}" class="back-link">← Назад до замовлень</a>
+
+    <h1 class="section-title">ЗАМОВЛЕННЯ #{{ order.id }}</h1>
+
+    <div class="order-detail-container">
+      <div class="order-detail-info">
+        <div class="info-block">
+          <h3>СТАТУС ЗАМОВЛЕННЯ</h3>
+          <p class="order-status-large status-{{ order.status }}">{{ order.get_status_display }}</p>
+          {% if order.delivery_tracking %}
+          <p>Трек-номер: {{ order.delivery_tracking }}</p>
+          {% endif %}
+        </div>
+
+        <div class="info-block">
+          <h3>ДАНІ ОТРИМУВАЧА</h3>
+          <p>{{ order.first_name }} {{ order.last_name }}</p>
+          <p>{{ order.phone }}</p>
+          <p>{{ order.email }}</p>
+        </div>
+
+        <div class="info-block">
+          <h3>АДРЕСА ДОСТАВКИ</h3>
+          <p>{{ order.address }}</p>
+          <p>{{ order.city }}{% if order.postal_code %}, {{ order.postal_code }}{% endif %}</p>
+          <p>{{ order.get_delivery_method_display }}</p>
+        </div>
+
+        <div class="info-block">
+          <h3>ОПЛАТА</h3>
+          <p>{{ order.get_payment_method_display }}</p>
+          <p>Статус: {% if order.is_paid %}Оплачено{% else %}Очікує оплату{% endif %}</p>
+        </div>
+      </div>
+
+      <div class="order-detail-items">
+        <h3>ТОВАРИ</h3>
+        <div class="items-list">
+          {% for item in items %}
+          <div class="order-item">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}">
+            <div class="order-item-info">
+              <h4>{{ item.product_name }}</h4>
+              {% if item.size %}<p>Розмір: {{ item.size }}</p>{% endif %}
+              {% if item.color %}<p>Колір: {{ item.color }}</p>{% endif %}
+              <p>Кількість: {{ item.quantity }}</p>
+            </div>
+            <div class="order-item-price">{{ item.product_price }} ₴</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="order-total">
+          <div class="total-row">
+            <span>Сума:</span>
+            <span>{{ order.subtotal }} ₴</span>
+          </div>
+          <div class="total-row">
+            <span>Доставка:</span>
+            <span>{{ order.delivery_price }} ₴</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Всього:</span>
+            <span>{{ order.total_price }} ₴</span>
+          </div>
+        </div>
+
+        {% if order.status == 'pending' %}
+        <a href="{% url 'orders:order_cancel' order.id %}" class="cancel-order-btn" onclick="return confirm('Скасувати замовлення?')">Скасувати замовлення</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: #666;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+.order-detail-container {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.order-detail-info {
+  flex: 1;
+}
+.info-block {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+.info-block h3 {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+.info-block p {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: #555;
+}
+.order-status-large {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  font-size: 0.8rem;
+}
+.order-detail-items {
+  flex: 1.5;
+}
+.order-detail-items h3 {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+.order-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+.order-item img {
+  width: 70px;
+  height: 90px;
+  object-fit: cover;
+}
+.order-item-info {
+  flex: 1;
+}
+.order-item-info h4 {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+.order-item-info p {
+  font-size: 0.7rem;
+  color: #666;
+}
+.order-item-price {
+  font-weight: 600;
+}
+.order-total {
+  margin-top: 1.5rem;
+  text-align: right;
+}
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+.grand-total {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
+}
+.cancel-order-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  text-decoration: none;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+</style>
+{% endblock %}

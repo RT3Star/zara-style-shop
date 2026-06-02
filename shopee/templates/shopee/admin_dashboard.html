@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Адмін панель{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.admin-dashboard {
+    margin-top: 100px;
+    padding: 0 2rem;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 1.5rem;
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+.stat-card h3 {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: #999;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+.stat-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #000;
+}
+.stat-unit {
+    font-size: 0.8rem;
+    color: #999;
+    margin-left: 0.3rem;
+}
+.stat-change {
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+}
+.stat-change.positive { color: #28a745; }
+.stat-change.negative { color: #dc3545; }
+
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+.section-title {
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+.table-dashboard {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-dashboard th,
+.table-dashboard td {
+    padding: 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+.table-dashboard th {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #999;
+    font-weight: 500;
+}
+.status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    border-radius: 20px;
+}
+.status-pending { background: #ffc107; color: #000; }
+.status-processing { background: #17a2b8; color: #fff; }
+.status-shipped { background: #007bff; color: #fff; }
+.status-delivered { background: #28a745; color: #fff; }
+.status-cancelled { background: #dc3545; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <h1 class="section-title" style="font-size: 1.2rem;">ПАНЕЛЬ УПРАВЛІННЯ</h1>
+    
+    <!-- Статистика -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Товари</h3>
+            <div class="stat-number">{{ stats.total_products }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Категорії</h3>
+            <div class="stat-number">{{ stats.total_categories }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Користувачі</h3>
+            <div class="stat-number">{{ stats.total_users }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Замовлення</h3>
+            <div class="stat-number">{{ stats.total_orders }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Виручка (місяць)</h3>
+            <div class="stat-number">{{ stats.revenue_month|floatformat:0 }} ₴</div>
+        </div>
+        <div class="stat-card">
+            <h3>Відгуки без відповіді</h3>
+            <div class="stat-number">{{ stats.unreplied_reviews }}</div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Замовлення за статусами -->
+        <div class="col-md-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">СТАТУСИ ЗАМОВЛЕНЬ</h2>
+                <canvas id="statusChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Виручка по днях -->
+        <div class="col-md-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">ВИРУЧКА (ОСТАННІ 7 ДНІВ)</h2>
+                <canvas id="revenueChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Товари з низьким залишком -->
+        <div class="col-md-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">ТОВАРИ З НИЗЬКИМ ЗАЛИШКОМ</h2>
+                <table class="table-dashboard">
+                    <thead>
+                        <tr><th>Товар</th><th>Залишок</th><th>Дія</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for product in stats.low_stock_products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td style="color: #dc3545;">{{ product.stock }} шт.</td>
+                            <td><a href="/admin/shopee/product/{{ product.id }}/change/">Оновити</a></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3">Немає товарів з низьким залишком</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Популярні товари -->
+        <div class="col-md-6">
+            <div class="dashboard-section">
+                <h2 class="section-title">ПОПУЛЯРНІ ТОВАРИ</h2>
+                <table class="table-dashboard">
+                    <thead><tr><th>Товар</th><th>Перегляди</th></tr></thead>
+                    <tbody>
+                        {% for product in stats.popular_products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.views_count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Останні замовлення -->
+    <div class="dashboard-section">
+        <h2 class="section-title">ОСТАННІ ЗАМОВЛЕННЯ</h2>
+        <table class="table-dashboard">
+            <thead>
+                <tr>
+                    <th>№</th><th>Клієнт</th><th>Сума</th><th>Статус</th><th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in stats.recent_orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.first_name }} {{ order.last_name }}</td>
+                    <td>{{ order.total_price }} ₴</td>
+                    <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// Графік статусів замовлень
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Очікує', 'В обробці', 'Відправлено', 'Доставлено', 'Скасовано'],
+        datasets: [{
+            data: [
+                {{ stats.orders_by_status.pending }},
+                {{ stats.orders_by_status.processing }},
+                {{ stats.orders_by_status.shipped }},
+                {{ stats.orders_by_status.delivered }},
+                {{ stats.orders_by_status.cancelled }}
+            ],
+            backgroundColor: ['#ffc107', '#17a2b8', '#007bff', '#28a745', '#dc3545'],
+            borderWidth: 0
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: true }
+});
+
+// Графік виручки
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revenueCtx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Виручка (₴)',
+            data: [12000, 15000, 18000, 14000, 22000, 25000, 20000],
+            borderColor: '#000',
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: true }
+});
+</script>
+{% endblock %}

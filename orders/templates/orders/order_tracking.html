@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Відстеження замовлення #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="tracking-page" style="margin-top: 120px;">
+  <div class="container">
+    <h1 class="section-title">ВІДСТЕЖЕННЯ ЗАМОВЛЕННЯ #{{ order.id }}</h1>
+
+    <div class="tracking-steps">
+      <div class="step {% if order.status == 'pending' %}active{% endif %} {% if order.status in 'processing,shipped,delivered' %}completed{% endif %}">
+        <div class="step-icon">1</div>
+        <div class="step-content">
+          <h4>Замовлення створено</h4>
+          <p>Ваше замовлення прийнято в обробку</p>
+          <span class="step-date">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+      </div>
+
+      <div class="step-line {% if order.status in 'processing,shipped,delivered' %}completed{% endif %}"></div>
+
+      <div class="step {% if order.status == 'processing' %}active{% endif %} {% if order.status in 'shipped,delivered' %}completed{% endif %}">
+        <div class="step-icon">2</div>
+        <div class="step-content">
+          <h4>Обробка замовлення</h4>
+          <p>Замовлення готується до відправки</p>
+        </div>
+      </div>
+
+      <div class="step-line {% if order.status in 'shipped,delivered' %}completed{% endif %}"></div>
+
+      <div class="step {% if order.status == 'shipped' %}active{% endif %} {% if order.status == 'delivered' %}completed{% endif %}">
+        <div class="step-icon">3</div>
+        <div class="step-content">
+          <h4>Відправлено</h4>
+          <p>Замовлення передано в службу доставки</p>
+          {% if order.delivery_tracking %}
+          <p class="tracking-number">Трек-номер: <strong>{{ order.delivery_tracking }}</strong></p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="step-line {% if order.status == 'delivered' %}completed{% endif %}"></div>
+
+      <div class="step {% if order.status == 'delivered' %}active completed{% endif %}">
+        <div class="step-icon">4</div>
+        <div class="step-content">
+          <h4>Доставлено</h4>
+          <p>Замовлення доставлено отримувачу</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tracking-actions">
+      <a href="{% url 'orders:order_detail' order.id %}" class="detail-btn">Деталі замовлення</a>
+      <a href="{% url 'shopee:product_list' %}" class="shop-btn">Продовжити покупки</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.tracking-steps {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.step {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0;
+  position: relative;
+}
+.step-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #999;
+  flex-shrink: 0;
+}
+.step.active .step-icon {
+  background: #000;
+  color: #fff;
+}
+.step.completed .step-icon {
+  background: #28a745;
+  color: #fff;
+}
+.step-content {
+  flex: 1;
+  padding-bottom: 1rem;
+}
+.step-content h4 {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+.step-content p {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 0.2rem;
+}
+.step-date {
+  font-size: 0.65rem;
+  color: #999;
+}
+.tracking-number {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  background: #f5f5f5;
+  display: inline-block;
+}
+.step-line {
+  width: 2px;
+  height: 30px;
+  background: #e0e0e0;
+  margin-left: 21px;
+  margin-bottom: 0.5rem;
+}
+.step-line.completed {
+  background: #28a745;
+}
+.tracking-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.detail-btn, .shop-btn {
+  padding: 0.8rem 2rem;
+  text-decoration: none;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+}
+.detail-btn {
+  background: #000;
+  color: #fff;
+}
+.shop-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+}
+</style>
+{% endblock %}

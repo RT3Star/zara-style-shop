@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Реєстрація{% endblock %}
+
+{% block content %}
+<div class="auth-page" style="margin-top: 120px; min-height: 60vh; display: flex; align-items: center;">
+  <div class="container">
+    <div class="auth-container">
+      <h1 class="section-title">РЕЄСТРАЦІЯ</h1>
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="auth-btn">ЗАРЕЄСТРУВАТИСЯ</button>
+      </form>
+      <p class="auth-link">Вже маєте акаунт? <a href="{% url 'usersed:login' %}">Увійти</a></p>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-form p {
+  margin-bottom: 1rem;
+}
+.auth-form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  font-family: 'Montserrat', sans-serif;
+}
+.auth-form label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+}
+</style>
+{% endblock %}

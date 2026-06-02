@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Видалення акаунту{% endblock %}
+
+{% block content %}
+<div class="delete-account-page" style="margin-top: 120px; min-height: 60vh;">
+  <div class="container">
+    <div class="delete-container">
+      <h1 class="section-title">ВИДАЛЕННЯ АКАУНТУ</h1>
+
+      <div class="warning-box">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Увага! Ця дія незворотня</h3>
+        <p>Ви впевнені, що хочете видалити свій акаунт?<br>
+        Всі ваші дані, замовлення та історія будуть безповоротно видалені.</p>
+      </div>
+
+      <form method="post" class="delete-form">
+        {% csrf_token %}
+        <div class="form-actions">
+          <button type="submit" class="delete-btn" onclick="return confirm('Ви дійсно хочете видалити акаунт?')">
+            ТАК, ВИДАЛИТИ АКАУНТ
+          </button>
+          <a href="{% url 'usersed:profile' %}" class="cancel-btn">НІ, ПОВЕРНУТИСЯ</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.delete-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.warning-box {
+  text-align: center;
+  padding: 2rem;
+  background: #f8f8f8;
+  margin-bottom: 2rem;
+}
+.warning-box i {
+  font-size: 3rem;
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+.warning-box h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.warning-box p {
+  color: #666;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.form-actions {
+  display: flex;
+  gap: 1rem;
+}
+.delete-btn {
+  flex: 1;
+  padding: 0.8rem;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+}
+.cancel-btn {
+  flex: 1;
+  padding: 0.8rem;
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #666;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+</style>
+{% endblock %}

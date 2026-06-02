@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Оформлення замовлення{% endblock %}
+
+{% block content %}
+<div class="checkout-page" style="margin-top: 120px;">
+  <div class="container">
+    <h1 class="section-title">ОФОРМЛЕННЯ ЗАМОВЛЕННЯ</h1>
+
+    <div class="checkout-container">
+      <div class="checkout-form">
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ім'я *</label>
+              {{ form.first_name }}
+            </div>
+            <div class="form-group">
+              <label>Прізвище *</label>
+              {{ form.last_name }}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email *</label>
+              {{ form.email }}
+            </div>
+            <div class="form-group">
+              <label>Телефон *</label>
+              {{ form.phone }}
+            </div>
+          </div>
+
+          <!-- Поле для пароля (тільки для неавторизованих) -->
+          {% if not user.is_authenticated %}
+          <div class="form-group">
+            <label>Пароль для входу</label>
+            {{ form.password }}
+            <small class="form-text text-muted">Заповніть, щоб створити акаунт. Залиште порожнім - пароль буде надіслано на email.</small>
+          </div>
+          {% endif %}
+
+          <div class="form-group">
+            <label>Адреса *</label>
+            {{ form.address }}
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Місто</label>
+              {{ form.city }}
+            </div>
+            <div class="form-group">
+              <label>Поштовий індекс</label>
+              {{ form.postal_code }}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Спосіб доставки</label>
+              {{ form.delivery_method }}
+            </div>
+            <div class="form-group">
+              <label>Спосіб оплати</label>
+              {{ form.payment_method }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Коментар до замовлення</label>
+            {{ form.comment }}
+          </div>
+
+          <button type="submit" class="submit-order-btn">ПІДТВЕРДИТИ ЗАМОВЛЕННЯ</button>
+        </form>
+      </div>
+
+      <div class="checkout-summary">
+        <h3>ВАШЕ ЗАМОВЛЕННЯ</h3>
+        <div class="summary-items">
+          {% for item in cart.items.all %}
+          <div class="summary-item">
+            <span>{{ item.product.name }} x {{ item.quantity }}</span>
+            <span>{{ item.total_price }} ₴</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="summary-total">
+          <div class="total-row">
+            <span>Товари:</span>
+            <span>{{ subtotal }} ₴</span>
+          </div>
+          <div class="total-row">
+            <span>Доставка:</span>
+            <span>{{ delivery_price }} ₴</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>ВСЬОГО:</span>
+            <span>{{ total }} ₴</span>
+          </div>
+        </div>
+        {% if not user.is_authenticated %}
+        <div class="alert alert-info mt-3">
+          <small>Після замовлення ви зможете увійти в акаунт з вказаним email та паролем (якщо ви його задали).</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.checkout-container {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.checkout-form {
+  flex: 2;
+}
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.form-group {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+.form-group label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ddd;
+  font-family: 'Montserrat', sans-serif;
+}
+.form-text {
+  font-size: 0.65rem;
+  color: #999;
+  margin-top: 0.3rem;
+  display: block;
+}
+.submit-order-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+.checkout-summary {
+  flex: 1;
+  background: #f8f8f8;
+  padding: 1.5rem;
+  height: fit-content;
+}
+.checkout-summary h3 {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.summary-total {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+}
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.grand-total {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+</style>
+{% endblock %}

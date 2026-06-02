@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="product-detail" style="margin-top: 100px; padding: 0 2rem;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: auto;">
+      </div>
+      <div class="col-md-6">
+        <h1 class="product-title">{{ product.name }}</h1>
+        <div class="product-price-detail">
+          {% if product.discount_price %}
+            <span class="current-price">{{ product.discount_price }} ₴</span>
+            <span class="old-price">{{ product.price }} ₴</span>
+            <span class="discount-badge">-{{ product.discount_percent }}%</span>
+          {% else %}
+            <span class="current-price">{{ product.price }} ₴</span>
+          {% endif %}
+        </div>
+
+        <div class="product-description">
+          <p>{{ product.description|linebreaks }}</p>
+        </div>
+
+        <!-- Розміри -->
+        {% if sizes %}
+        <div class="size-selector">
+          <label>РОЗМІР</label>
+          <div class="size-buttons">
+            {% for size in sizes %}
+            <button class="size-btn" data-size="{{ size.name }}">{{ size.name }}</button>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Кількість -->
+        <div class="quantity-selector">
+          <label>КІЛЬКІСТЬ</label>
+          <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}">
+        </div>
+
+        <!-- Наявність -->
+        <div class="stock-status">
+          {% if product.is_available %}
+            <span class="in-stock">✓ В наявності ({{ product.stock }} шт.)</span>
+          {% else %}
+            <span class="out-of-stock">✗ Немає в наявності</span>
+          {% endif %}
+        </div>
+
+        <!-- Кнопка додавання -->
+        <button class="btn-add-to-cart" id="addToCartBtn" data-id="{{ product.id }}">
+          Додати в кошик
+        </button>
+      </div>
+    </div>
+
+    <!-- Відгуки -->
+    <div class="reviews-section" style="margin-top: 4rem;">
+      <h3 class="section-title">ВІДГУКИ</h3>
+      {% if user.is_authenticated and not user_review %}
+      <div class="add-review">
+        <form method="post" action="{% url 'shopee:add_review' product.id %}" class="review-form">
+          {% csrf_token %}
+          <select name="rating" required>
+            <option value="">Оцінка</option>
+            <option value="5">5⭐ - Відмінно</option>
+            <option value="4">4⭐ - Добре</option>
+            <option value="3">3⭐ - Нормально</option>
+            <option value="2">2⭐ - Погано</option>
+            <option value="1">1⭐ - Жахливо</option>
+          </select>
+          <textarea name="comment" placeholder="Ваш коментар..." rows="3" required></textarea>
+          <button type="submit">Залишити відгук</button>
+        </form>
+      </div>
+      {% endif %}
+
+      <div class="reviews-list">
+        {% for review in reviews %}
+        <div class="review-item">
+          <div class="review-header">
+            <strong>{{ review.user.username }}</strong>
+            <span class="review-rating">⭐ {{ review.rating }}/5</span>
+            <span class="review-date">{{ review.created_at|date:"d.m.Y" }}</span>
+          </div>
+          <p>{{ review.comment }}</p>
+        </div>
+        {% empty %}
+        <p style="text-align: center; color: #999;">Поки немає відгуків. Будьте першим!</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Рекомендації -->
+    {% if recommendations %}
+    <div class="recommendations" style="margin-top: 4rem;">
+      <h3 class="section-title">Вам також сподобається</h3>
+      <div class="products-grid">
+        {% for rec in recommendations %}
+        <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' rec.slug %}'">
+          <img class="product-img" src="{{ rec.image.url }}" alt="{{ rec.name }}">
+          <div class="product-info">
+            <div class="product-title">{{ rec.name|truncatechars:35 }}</div>
+            <div class="product-price">{{ rec.price }} ₴</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.product-detail {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.product-title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+.product-price-detail {
+  margin-bottom: 1.5rem;
+}
+.current-price {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+.old-price {
+  text-decoration: line-through;
+  color: #999;
+  margin-left: 0.5rem;
+}
+.discount-badge {
+  background: #000;
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+}
+.product-description {
+  color: #555;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+.size-selector, .quantity-selector {
+  margin-bottom: 1.5rem;
+}
+.size-selector label, .quantity-selector label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+.size-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.size-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.size-btn:hover, .size-btn.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+#quantity {
+  width: 100px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+}
+.stock-status {
+  margin-bottom: 1.5rem;
+}
+.in-stock {
+  color: #28a745;
+  font-size: 0.8rem;
+}
+.out-of-stock {
+  color: #dc3545;
+}
+.btn-add-to-cart {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-add-to-cart:hover {
+  background: #2c2c2c;
+}
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.review-form select, .review-form textarea {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  font-family: 'Montserrat', sans-serif;
+}
+.review-form button {
+  width: 200px;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.review-item {
+  border-bottom: 1px solid #eee;
+  padding: 1rem 0;
+}
+.review-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.review-rating {
+  color: #f5a623;
+}
+.review-date {
+  color: #999;
+}
+</style>
+
+<script>
+document.getElementById('addToCartBtn')?.addEventListener('click', function() {
+  const productId = this.dataset.id;
+  const quantity = document.getElementById('quantity').value;
+  addToCart(productId, quantity);
+});
+
+document.querySelectorAll('.size-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ZARA | Кошик{% endblock %}
+
+{% block content %}
+<div class="cart-page" style="margin-top: 120px; padding: 0 2rem;">
+  <div class="container">
+    <h1 class="section-title">КОШИК</h1>
+
+    {% if cart_items %}
+    <div class="cart-content">
+      <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-item">
+          <img class="cart-item-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+          <div class="cart-item-details">
+            <h4>{{ item.product.name }}</h4>
+            {% if item.size %}<p class="cart-item-option">Розмір: {{ item.size }}</p>{% endif %}
+            {% if item.color %}<p class="cart-item-option">Колір: {{ item.color }}</p>{% endif %}
+            <div class="cart-item-price">{{ item.price }} ₴</div>
+          </div>
+          <div class="cart-item-actions">
+            <form method="post" action="{% url 'cart:update_cart_item' item.id %}" class="quantity-form">
+              {% csrf_token %}
+              <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="quantity-input">
+              <button type="submit" class="update-btn">Оновити</button>
+            </form>
+            <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
+              {% csrf_token %}
+              <button type="submit" class="remove-btn">Видалити</button>
+            </form>
+          </div>
+          <div class="cart-item-total">{{ item.total_price }} ₴</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="cart-summary">
+        <h3>ВСЬОГО</h3>
+        <div class="summary-row">
+          <span>Товари:</span>
+          <span>{{ total_items }} шт.</span>
+        </div>
+        <div class="summary-row">
+          <span>Доставка:</span>
+          <span>Розраховується</span>
+        </div>
+        <div class="summary-total">
+          <span>До сплати:</span>
+          <span>{{ total_price }} ₴</span>
+        </div>
+        <a href="{% url 'orders:order_create' %}" class="checkout-link">ОФОРМИТИ ЗАМОВЛЕННЯ</a>
+        <a href="{% url 'shopee:product_list' %}" class="continue-link">Продовжити покупки</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+      <i class="fas fa-shopping-bag"></i>
+      <h2>Ваш кошик порожній</h2>
+      <p>Додайте товари до кошика, щоб зробити замовлення</p>
+      <a href="{% url 'shopee:product_list' %}" class="btn-outline-light">Перейти до покупок</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.cart-content {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.cart-items {
+  flex: 2;
+}
+.cart-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cart-item-img {
+  width: 100px;
+  height: 130px;
+  object-fit: cover;
+}
+.cart-item-details {
+  flex: 1;
+}
+.cart-item-details h4 {
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+.cart-item-option {
+  font-size: 0.7rem;
+  color: #666;
+}
+.cart-item-price {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+.cart-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.quantity-input {
+  width: 60px;
+  padding: 0.3rem;
+  border: 1px solid #ddd;
+}
+.update-btn, .remove-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.update-btn:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+.remove-btn:hover {
+  background: #dc3545;
+  color: #fff;
+  border-color: #dc3545;
+}
+.cart-item-total {
+  font-weight: 600;
+  min-width: 100px;
+  text-align: right;
+}
+.cart-summary {
+  flex: 1;
+  background: #f8f8f8;
+  padding: 1.5rem;
+  height: fit-content;
+}
+.cart-summary h3 {
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem 0;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.checkout-link {
+  display: block;
+  width: 100%;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 0.8rem;
+  text-decoration: none;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.continue-link {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1px solid #ddd;
+  text-align: center;
+  padding: 0.8rem;
+  text-decoration: none;
+  color: #666;
+  font-size: 0.8rem;
+}
+.empty-cart {
+  text-align: center;
+  padding: 4rem;
+}
+.empty-cart i {
+  font-size: 4rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+.empty-cart h2 {
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

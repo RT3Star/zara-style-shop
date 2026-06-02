@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}403 | Доступ заборонено{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 150px; min-height: 60vh;">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-code" style="font-size: 6rem; font-weight: 300; color: #ccc;">403</div>
+            <h1 class="error-title" style="font-size: 1.8rem; font-weight: 300; letter-spacing: 3px;">ДОСТУП ЗАБОРОНЕНО</h1>
+            <p class="error-text" style="color: #666; margin: 1rem 0;">
+                Забагато невдалих спроб. Зачекайте 1 хвилину перед наступною спробою.
+            </p>
+            <div class="error-actions">
+                <a href="{% url 'shopee:home' %}" class="btn btn-dark" style="background: #000; color: #fff; padding: 0.8rem 2rem; text-decoration: none; margin: 0.5rem;">На головну</a>
+                <a href="javascript:history.back()" class="btn btn-outline-dark" style="padding: 0.8rem 2rem; text-decoration: none; margin: 0.5rem;">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

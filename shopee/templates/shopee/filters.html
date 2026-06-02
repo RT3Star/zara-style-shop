@@ -1,0 +1,151 @@
+<div class="filters-sidebar">
+    <h4>Фільтри</h4>
+
+    <form method="get" id="filter-form">
+        <!-- Сортування -->
+        <div class="mb-3">
+            <label class="form-label">Сортувати за:</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="-created_at" {% if current_filters.sort == '-created_at' %}selected{% endif %}>Новинки</option>
+                <option value="price" {% if current_filters.sort == 'price' %}selected{% endif %}>Ціна (зростання)</option>
+                <option value="-price" {% if current_filters.sort == '-price' %}selected{% endif %}>Ціна (спадання)</option>
+                <option value="name" {% if current_filters.sort == 'name' %}selected{% endif %}>Назва (А-Я)</option>
+                <option value="-name" {% if current_filters.sort == '-name' %}selected{% endif %}>Назва (Я-А)</option>
+                <option value="-views_count" {% if current_filters.sort == '-views_count' %}selected{% endif %}>Популярні</option>
+            </select>
+        </div>
+
+        <!-- Ціна -->
+        <div class="mb-3">
+            <label class="form-label">Ціна:</label>
+            <div class="row">
+                <div class="col">
+                    <input type="number" name="min_price" class="form-control" placeholder="від"
+                           value="{{ current_filters.min_price }}" onchange="this.form.submit()">
+                </div>
+                <div class="col">
+                    <input type="number" name="max_price" class="form-control" placeholder="до"
+                           value="{{ current_filters.max_price }}" onchange="this.form.submit()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Категорії -->
+        <div class="mb-3">
+            <label class="form-label">Категорії:</label>
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="">Всі категорії</option>
+                {% for category in categories %}
+                <option value="{{ category.slug }}" {% if current_filters.category == category.slug %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Розміри (для одягу) -->
+        {% if sizes %}
+        <div class="mb-3">
+            <label class="form-label">Розміри:</label>
+            <div class="d-flex flex-wrap gap-2">
+                {% for size in sizes %}
+                <div class="form-check">
+                    <input type="checkbox" name="size" value="{{ size.name }}"
+                           class="form-check-input" id="size_{{ size.id }}"
+                           {% if size.name in request.GET.size %}checked{% endif %}
+                           onchange="this.form.submit()">
+                    <label class="form-check-label" for="size_{{ size.id }}">
+                        {{ size.name }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Кольори (для одягу) -->
+        {% if colors %}
+        <div class="mb-3">
+            <label class="form-label">Кольори:</label>
+            <div class="d-flex flex-wrap gap-2">
+                {% for color in colors %}
+                <div class="form-check">
+                    <input type="checkbox" name="color" value="{{ color.name }}"
+                           class="form-check-input" id="color_{{ color.id }}"
+                           {% if color.name in request.GET.color %}checked{% endif %}
+                           onchange="this.form.submit()">
+                    <label class="form-check-label" for="color_{{ color.id }}">
+                        <span class="badge" style="background-color: {{ color.code }}; width: 20px; height: 20px; margin-right: 5px;"></span>
+                        {{ color.name }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Стать (для одягу) -->
+        <div class="mb-3">
+            <label class="form-label">Для кого:</label>
+            <select name="gender" class="form-select" onchange="this.form.submit()">
+                <option value="">Всі</option>
+                <option value="M" {% if current_filters.gender == 'M' %}selected{% endif %}>Чоловічий</option>
+                <option value="F" {% if current_filters.gender == 'F' %}selected{% endif %}>Жіночий</option>
+                <option value="U" {% if current_filters.gender == 'U' %}selected{% endif %}>Унісекс</option>
+                <option value="K" {% if current_filters.gender == 'K' %}selected{% endif %}>Дитячий</option>
+            </select>
+        </div>
+
+        <!-- Наявність -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" name="in_stock" class="form-check-input" value="true"
+                   id="in_stock" {% if current_filters.in_stock == 'true' %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <label class="form-check-label" for="in_stock">
+                Тільки в наявності
+            </label>
+        </div>
+
+        <!-- Знижка -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" name="discounted" class="form-check-input" value="true"
+                   id="discounted" {% if request.GET.discounted == 'true' %}checked{% endif %}
+                   onchange="this.form.submit()">
+            <label class="form-check-label" for="discounted">
+                🔥 Тільки зі знижкою
+            </label>
+        </div>
+
+        <!-- Активні фільтри -->
+        {% if request.GET.min_price or request.GET.max_price or request.GET.category or request.GET.size or request.GET.color or request.GET.gender or request.GET.in_stock or request.GET.discounted %}
+        <div class="mb-3">
+            <label class="form-label">Активні фільтри:</label>
+            <div class="d-flex flex-wrap gap-2">
+                {% if request.GET.min_price %}
+                <span class="badge bg-secondary">
+                    Ціна від: {{ request.GET.min_price }}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'min_price' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="text-white ms-1">✕</a>
+                </span>
+                {% endif %}
+                {% if request.GET.max_price %}
+                <span class="badge bg-secondary">
+                    Ціна до: {{ request.GET.max_price }}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'max_price' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="text-white ms-1">✕</a>
+                </span>
+                {% endif %}
+                {% if request.GET.category %}
+                <span class="badge bg-secondary">
+                    Категорія видалена
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'category' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="text-white ms-1">✕</a>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Скинути фільтри -->
+        <a href="{% url 'shopee:product_list' %}" class="btn btn-secondary btn-sm w-100">
+            Скинути всі фільтри
+        </a>
+    </form>
+</div>
