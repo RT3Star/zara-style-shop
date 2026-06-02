@@ -5,16 +5,13 @@ from .models import Category, Product
 
 
 class HomePageTest(TestCase):
-    """Тести головної сторінки"""
 
     def test_home_page_status_code(self):
-        """Перевірка що головна сторінка завантажується"""
         response = self.client.get(reverse("shopee:home"))
         self.assertEqual(response.status_code, 200)
 
 
 class ProductListTest(TestCase):
-    """Тести сторінки каталогу"""
 
     def setUp(self):
         self.category = Category.objects.create(
@@ -31,12 +28,10 @@ class ProductListTest(TestCase):
         )
 
     def test_catalog_page_status(self):
-        """Перевірка сторінки каталогу"""
         response = self.client.get(reverse("shopee:product_list"))
         self.assertEqual(response.status_code, 200)
 
     def test_filter_by_price(self):
-        """Перевірка фільтрації за ціною"""
         response = self.client.get(
             reverse("shopee:product_list"), {"min_price": 500, "max_price": 1500}
         )
@@ -44,7 +39,6 @@ class ProductListTest(TestCase):
 
 
 class UrlTest(TestCase):
-    """Тести URL маршрутів"""
 
     def test_home_url(self):
         response = self.client.get("/shop/")
@@ -72,19 +66,16 @@ class UrlTest(TestCase):
 
 
 class CacheTest(TestCase):
-    """Тести кешування"""
 
     def setUp(self):
         cache.clear()
 
     def test_cache_works(self):
-        """Перевірка що кешування працює"""
         cache_key = "test_key"
         cache.set(cache_key, "test_value", 60)
         self.assertEqual(cache.get(cache_key), "test_value")
 
     def test_cache_clear(self):
-        """Перевірка очищення кешу"""
         cache_key = "test_key_2"
         cache.set(cache_key, "value", 60)
         cache.delete(cache_key)
@@ -92,7 +83,6 @@ class CacheTest(TestCase):
 
 
 class ModelTest(TestCase):
-    """Тести моделей"""
 
     def setUp(self):
         self.category = Category.objects.create(
@@ -109,20 +99,16 @@ class ModelTest(TestCase):
         )
 
     def test_category_creation(self):
-        """Перевірка створення категорії"""
         self.assertEqual(self.category.name, "Категорія")
         self.assertEqual(self.category.slug, "category-slug")
 
     def test_product_creation(self):
-        """Перевірка створення товару"""
         self.assertEqual(self.product.name, "Товар")
         self.assertEqual(self.product.price, 500)
         self.assertEqual(self.product.stock, 5)
 
     def test_product_str_method(self):
-        """Перевірка методу __str__ товару"""
         self.assertEqual(str(self.product), "Товар")
 
     def test_category_str_method(self):
-        """Перевірка методу __str__ категорії"""
         self.assertEqual(str(self.category), "Категорія")

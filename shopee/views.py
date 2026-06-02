@@ -16,24 +16,19 @@ from django.core.cache import cache
 
 @cache_page(60 * 5)
 def home_view(request):
-    """Головна сторінка"""
-    # Нові товари
+
     new_products = Product.objects.filter(is_active=True).order_by("-created_at")[:8]
 
-    # Популярні товари
     popular_products = Product.objects.filter(is_active=True).order_by("-views_count")[
         :8
     ]
 
-    # Товари зі знижкою
     discounted_products = Product.objects.filter(
         is_active=True, discount_price__isnull=False
     )[:8]
 
-    # Хіти продажів
     bestsellers = Product.objects.filter(is_active=True, is_bestseller=True)[:8]
 
-    # Категорії з кількістю товарів
     categories = Category.objects.annotate(
         product_count=Count("products", filter=Q(products__is_active=True))
     ).filter(product_count__gt=0)[:6]
@@ -49,11 +44,9 @@ def home_view(request):
 
 
 def search_view(request):
-    """Сторінка пошуку товарів"""
     query = request.GET.get("q", "")
     products = Product.objects.filter(is_active=True)
 
-    # Зберігаємо історію пошуку в сесії
     if query and query not in request.session.get("search_history", []):
         search_history = request.session.get("search_history", [])
         search_history.insert(0, query)
@@ -66,7 +59,6 @@ def search_view(request):
             | Q(category__name__icontains=query)
         ).select_related("category")
 
-    # Популярні пошукові запити для магазину одягу
     popular_searches = ["футболка", "джинси", "кросівки", "світшот", "пальто", "сукня"]
 
     context = {
@@ -80,7 +72,6 @@ def search_view(request):
 
 
 def product_detail_view(request, slug):
-    """Детальна сторінка товару"""
     cache_key = f"product_detail_{slug}"
 
     cached_response = cache.get(cache_key)
@@ -89,23 +80,19 @@ def product_detail_view(request, slug):
 
     product = get_object_or_404(Product, slug=slug, is_active=True)
 
-    # Збільшуємо лічильник переглядів
     product.views_count = F("views_count") + 1
     product.save()
     product.refresh_from_db()
 
-    # Зберігаємо історію переглядів
     viewed_products = request.session.get("viewed_products", [])
     if product.id not in viewed_products:
         viewed_products.insert(0, product.id)
         request.session["viewed_products"] = viewed_products[:10]
 
-    # Рекомендації (товари з тієї ж категорії та схожими характеристиками)
     recommendations = Product.objects.filter(
         category=product.category, is_active=True
     ).exclude(id=product.id)[:8]
 
-    # Якщо мало рекомендацій, додаємо товари з інших категорій
     if recommendations.count() < 8:
         more_recommendations = (
             Product.objects.filter(is_active=True)
@@ -114,11 +101,9 @@ def product_detail_view(request, slug):
         )
         recommendations = list(recommendations) + list(more_recommendations)
 
-    # Відгуки
     reviews = product.reviews.filter(is_approved=True)[:10]
     average_rating = product.average_rating
 
-    # Чи залишав користувач відгук
     user_review = None
     if request.user.is_authenticated:
         user_review = product.reviews.filter(user=request.user).first()
@@ -139,42 +124,34 @@ def product_detail_view(request, slug):
 
 
 def product_list_view(request):
-    """Сторінка зі списком товарів (з фільтрацією та пагінацією)"""
 
-    # Унікальний ключ кешу на основі всіх параметрів
     cache_key = f"product_list_{request.GET.urlencode()}"
 
-    # Спроба отримати з кешу
     cached_response = cache.get(cache_key)
     if cached_response:
         return cached_response
 
-    # Базовий queryset з оптимізацією
     products = (
         Product.objects.select_related("category")
         .prefetch_related("images", "sizes", "colors")
         .filter(is_active=True)
     )
 
-    # Застосовуємо фільтри
     product_filter = ProductFilter(request, products)
     product_filter.filter_by_price().filter_by_category().filter_by_availability()
     product_filter.filter_by_sizes().filter_by_colors().filter_by_gender()
     products = product_filter.sort_by().get_queryset()
 
-    # Пагінація
     paginator = Paginator(products, 12)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # Отримуємо дані для фільтрів
     categories = Category.objects.filter(
         products__isnull=False, products__is_active=True
     ).distinct()
     sizes = Size.objects.filter(products__isnull=False).distinct()
     colors = Color.objects.filter(products__isnull=False).distinct()
 
-    # Діапазон цін для фільтра
     price_range = Product.objects.filter(is_active=True).aggregate(
         min_price=Min("price"), max_price=Max("price")
     )
@@ -197,7 +174,6 @@ def product_list_view(request):
         },
     }
 
-    # Зберігаємо ВІДПОВІДЬ в кеш, а не context
     response = render(request, "shopee/product_list.html", context)
     cache.set(cache_key, response, 300)  # 5 хвилин
 
@@ -206,14 +182,12 @@ def product_list_view(request):
 
 @require_POST
 def add_review_view(request, product_id):
-    """Додавання відгуку до товару"""
     if not request.user.is_authenticated:
         messages.error(request, "Увійдіть в акаунт, щоб залишити відгук")
         return redirect("usersed:login")
 
     product = get_object_or_404(Product, id=product_id, is_active=True)
 
-    # Перевіряємо чи вже є відгук
     if Review.objects.filter(product=product, user=request.user).exists():
         messages.error(request, "Ви вже залишали відгук на цей товар")
         return redirect("shopee:product_detail", slug=product.slug)
@@ -233,7 +207,6 @@ def add_review_view(request, product_id):
 
 
 def category_products_view(request, slug):
-    """Товари за категорією"""
     category = get_object_or_404(Category, slug=slug, is_active=True)
     products = Product.objects.filter(category=category, is_active=True)
 
@@ -245,7 +218,6 @@ def category_products_view(request, slug):
 
 
 def get_product_filters(request):
-    """API для отримання фільтрів (AJAX)"""
     filters = {
         "categories": list(
             Category.objects.filter(products__isnull=False)
@@ -272,7 +244,6 @@ def get_product_filters(request):
 
 @staff_member_required
 def admin_dashboard(request):
-    """Адмін панель з дашбордом"""
     stats = DashboardStats.get_stats()
 
     context = {

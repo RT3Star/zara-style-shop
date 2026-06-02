@@ -4,9 +4,7 @@ from django.template.loader import render_to_string
 
 
 def send_order_confirmation_email(order):
-    """Відправка email підтвердження замовлення"""
 
-    # Формуємо список товарів
     items_html = ""
     items_text = ""
     for item in order.items.all():
@@ -22,7 +20,6 @@ def send_order_confirmation_email(order):
             f"{item.product_name} x {item.quantity} = {item.total_price()} ₴\n"
         )
 
-    # HTML шаблон для email
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -83,7 +80,6 @@ def send_order_confirmation_email(order):
     </html>
     """
 
-    # Текстова версія для email
     text_content = f"""
     Дякуємо за замовлення, {order.first_name}!
 
@@ -109,7 +105,6 @@ def send_order_confirmation_email(order):
 
 
 def send_order_status_update_email(order, old_status, new_status):
-    """Відправка email при зміні статусу замовлення"""
 
     status_messages = {
         "processing": "Ваше замовлення прийнято в обробку",

@@ -11,7 +11,6 @@ from shopee.models import Product
 
 
 def get_or_create_cart(request):
-    """Отримує або створює кошик для поточного користувача"""
 
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
@@ -95,7 +94,6 @@ def get_or_create_cart(request):
 
 
 def cart_detail(request):
-    """Відображення кошика"""
     cart = get_or_create_cart(request)
 
     context = {
@@ -110,9 +108,7 @@ def cart_detail(request):
 @require_POST
 @ratelimit(key="ip", rate="30/m", method="POST")
 def add_to_cart(request, product_id):
-    """Додавання товару до кошика (синхронне)"""
 
-    # Перевірка на обмеження частоти
     was_limited = getattr(request, "limited", False)
     if was_limited:
         messages.error(request, "Забагато запитів. Зачекайте трохи.")
@@ -160,7 +156,6 @@ def add_to_cart(request, product_id):
 
 @require_POST
 def update_cart_item(request, item_id):
-    """Оновлення кількості товару в кошику"""
     cart_item = get_object_or_404(CartItem, id=item_id)
     quantity = int(request.POST.get("quantity", 0))
 
@@ -180,7 +175,6 @@ def update_cart_item(request, item_id):
 
 @require_POST
 def remove_from_cart(request, item_id):
-    """Видалення товару з кошика"""
     cart_item = get_object_or_404(CartItem, id=item_id)
     cart_item.delete()
     messages.success(request, "Товар видалено з кошика")
@@ -188,7 +182,6 @@ def remove_from_cart(request, item_id):
 
 
 def cart_count(request):
-    """Повертає кількість товарів у кошику (для AJAX)"""
     cart = get_or_create_cart(request)
     return JsonResponse({"count": cart.total_items()})
 
@@ -196,9 +189,7 @@ def cart_count(request):
 @require_POST
 @ratelimit(key="ip", rate="30/m", method="POST")
 def add_to_cart_ajax(request):
-    """Додавання товару до кошика через AJAX"""
 
-    # Перевірка на обмеження частоти
     was_limited = getattr(request, "limited", False)
     if was_limited:
         return JsonResponse(

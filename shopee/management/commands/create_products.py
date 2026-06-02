@@ -10,7 +10,6 @@ class Command(BaseCommand):
     help = "Створює тестові товари для магазину"
 
     def download_image(self, url, product_name):
-        """Завантажує зображення з URL"""
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=10) as response:
@@ -24,7 +23,6 @@ class Command(BaseCommand):
             return None
 
     def handle(self, *args, **kwargs):
-        # Створення категорій
         categories_data = [
             {"name": "Сукні", "slug": "sukni"},
             {"name": "Сорочки", "slug": "sorochki"},
@@ -46,7 +44,6 @@ class Command(BaseCommand):
                 f'{"Створено" if created else "Існує"} категорію: {category.name}'
             )
 
-        # Створення розмірів
         sizes_data = [
             "XS",
             "S",
@@ -68,7 +65,6 @@ class Command(BaseCommand):
             Size.objects.get_or_create(name=size_name)
         self.stdout.write(f"Створено {Size.objects.count()} розмірів")
 
-        # Створення кольорів
         colors_data = [
             {"name": "Чорний", "code": "#000000"},
             {"name": "Білий", "code": "#FFFFFF"},
@@ -91,8 +87,6 @@ class Command(BaseCommand):
             )
         self.stdout.write(f"Створено {Color.objects.count()} кольорів")
 
-        # Товари з реальними зображеннями (БІЛЬШЕ ТОВАРІВ)
-        # Товари з реальними зображеннями
         products_data = [
             # ===== СУКНІ =====
             {
@@ -384,7 +378,6 @@ class Command(BaseCommand):
                 )
 
                 if created:
-                    # Додаємо зображення
                     if prod_data.get("image_url"):
                         img_content = self.download_image(
                             prod_data["image_url"], prod_data["slug"]
@@ -397,7 +390,6 @@ class Command(BaseCommand):
                                 f"  📷 Додано зображення для {product.name}"
                             )
 
-                    # Додаємо розміри
                     for size_name in prod_data["sizes"]:
                         try:
                             size = Size.objects.get(name=size_name)
@@ -405,7 +397,6 @@ class Command(BaseCommand):
                         except Size.DoesNotExist:
                             pass
 
-                    # Додаємо кольори
                     for color_name in prod_data["colors"]:
                         try:
                             color = Color.objects.get(name=color_name)

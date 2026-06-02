@@ -30,7 +30,7 @@ handler500 = usersed_views.handler500
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Головна сторінка - перенаправляє на shop/
+    # Головна перенаправляє на shop
     path("", RedirectView.as_view(url="/shop/", permanent=False), name="home"),
     path("shop/", include("shopee.urls")),
     path("cart/", include("cart.urls")),

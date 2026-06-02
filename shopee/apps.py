@@ -7,5 +7,4 @@ class ShopeeConfig(AppConfig):
     verbose_name = "Магазин одягу"
 
     def ready(self):
-        """Імпортуємо сигнали при запуску додатку"""
         import shopee.signals

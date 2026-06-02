@@ -3,9 +3,7 @@ from .models import Order
 
 
 class OrderCreateForm(forms.ModelForm):
-    """Форма оформлення замовлення"""
 
-    # Додаткове поле для пароля (для неавторизованих)
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
         required=False,
@@ -73,9 +71,7 @@ class OrderCreateForm(forms.ModelForm):
         self.fields["city"].required = True
 
     def clean_phone(self):
-        """Валідація телефону"""
         phone = self.cleaned_data.get("phone")
-        # Проста валідація українського номера
         if (
             phone
             and not phone.replace("+", "").replace(" ", "").replace("-", "").isdigit()
@@ -84,7 +80,6 @@ class OrderCreateForm(forms.ModelForm):
         return phone
 
     def clean_email(self):
-        """Валідація email"""
         email = self.cleaned_data.get("email")
         if email and "@" not in email:
             raise forms.ValidationError("Введіть коректний email")

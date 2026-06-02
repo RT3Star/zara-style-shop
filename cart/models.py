@@ -4,7 +4,6 @@ from shopee.models import Product
 
 
 class Cart(models.Model):
-    """Модель кошика користувача"""
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,

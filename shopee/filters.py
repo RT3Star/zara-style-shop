@@ -8,7 +8,6 @@ class ProductFilter:
         self.queryset = queryset if queryset is not None else Product.objects.all()
 
     def filter_by_price(self):
-        """Фільтр за ціною"""
         min_price = self.request.GET.get("min_price")
         max_price = self.request.GET.get("max_price")
 
@@ -28,49 +27,42 @@ class ProductFilter:
         return self
 
     def filter_by_category(self):
-        """Фільтр за категорією"""
         category = self.request.GET.get("category")
         if category:
             self.queryset = self.queryset.filter(category__slug=category)
         return self
 
     def filter_by_availability(self):
-        """Фільтр за наявністю"""
         in_stock = self.request.GET.get("in_stock")
         if in_stock == "true":
             self.queryset = self.queryset.filter(stock__gt=0)
         return self
 
     def filter_by_sizes(self):
-        """Фільтр за розмірами (для одягу)"""
         size = self.request.GET.get("size")
         if size:
             self.queryset = self.queryset.filter(sizes__name=size)
         return self
 
     def filter_by_colors(self):
-        """Фільтр за кольорами (для одягу)"""
         color = self.request.GET.get("color")
         if color:
             self.queryset = self.queryset.filter(colors__name=color)
         return self
 
     def filter_by_gender(self):
-        """Фільтр за статтю"""
         gender = self.request.GET.get("gender")
         if gender:
             self.queryset = self.queryset.filter(gender=gender)
         return self
 
     def filter_by_discount(self):
-        """Фільтр за знижкою"""
         discounted = self.request.GET.get("discounted")
         if discounted == "true":
             self.queryset = self.queryset.filter(discount_price__isnull=False)
         return self
 
     def filter_by_search(self):
-        """Фільтр за пошуковим запитом"""
         search_query = self.request.GET.get("q")
         if search_query:
             self.queryset = self.queryset.filter(
@@ -81,10 +73,8 @@ class ProductFilter:
         return self
 
     def sort_by(self):
-        """Сортування товарів"""
         sort_option = self.request.GET.get("sort", "-created_at")
 
-        # Дозволені варіанти сортування
         allowed_sorts = {
             "price": "price",
             "-price": "-price",
@@ -102,13 +92,11 @@ class ProductFilter:
             sort_field = allowed_sorts[sort_option]
             self.queryset = self.queryset.order_by(sort_field)
         else:
-            # За замовчуванням - новинки
             self.queryset = self.queryset.order_by("-created_at")
 
         return self
 
     def filter_by_price_range(self):
-        """Фільтр за діапазоном цін (слайдер)"""
         min_price = self.request.GET.get("min_price")
         max_price = self.request.GET.get("max_price")
 
@@ -123,15 +111,12 @@ class ProductFilter:
         return self
 
     def get_queryset(self):
-        """Повертає фільтрований queryset з оптимізацією"""
-        # Оптимізація запитів
         self.queryset = self.queryset.select_related("category").prefetch_related(
             "images", "reviews", "sizes", "colors"
         )
         return self.queryset
 
     def get_price_range(self):
-        """Отримує мінімальну та максимальну ціну в категорії"""
         price_range = self.queryset.aggregate(
             min_price=Min("price"), max_price=Max("price")
         )
@@ -141,7 +126,6 @@ class ProductFilter:
         }
 
     def get_available_filters(self):
-        """Отримує доступні значення для фільтрів"""
         available_filters = {
             "categories": list(
                 Category.objects.filter(products__in=self.queryset)
@@ -163,9 +147,7 @@ class ProductFilter:
         return available_filters
 
 
-# Проста функція для швидкої фільтрації
 def filter_products(request, queryset):
-    """Зручна функція для фільтрації товарів"""
     filters = ProductFilter(request, queryset)
     filters.filter_by_price().filter_by_category().filter_by_availability().filter_by_sizes().filter_by_colors().filter_by_gender().filter_by_discount().sort_by()
     return filters.get_queryset()

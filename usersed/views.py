@@ -23,7 +23,6 @@ from django.shortcuts import render
 
 @ratelimit(key="ip", rate="5/m", method="POST", block=True)
 def register_view(request):
-    """Реєстрація нового користувача"""
 
     if request.user.is_authenticated:
         return redirect("home")
@@ -53,7 +52,6 @@ def register_view(request):
 
 @ratelimit(key="ip", rate="10/m", method="POST", block=True)
 def login_view(request):
-    """Вхід користувача"""
 
     if request.user.is_authenticated:
         return redirect("home")
@@ -75,7 +73,6 @@ def login_view(request):
 
 
 def logout_view(request):
-    """Вихід користувача"""
     logout(request)
     messages.info(request, "Ви вийшли з акаунту.")
     return redirect("home")
@@ -83,13 +80,11 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    """Перегляд профілю користувача"""
     return render(request, "usersed/profile.html", {"user": request.user})
 
 
 @login_required
 def profile_edit_view(request):
-    """Редагування профілю користувача"""
     try:
         profile = request.user.profile
     except UserProfile.DoesNotExist:
@@ -119,7 +114,6 @@ def profile_edit_view(request):
 
 @login_required
 def change_password_view(request):
-    """Зміна пароля користувача"""
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
@@ -137,7 +131,6 @@ def change_password_view(request):
 
 @login_required
 def delete_profile_view(request):
-    """Видалення профілю користувача"""
     if request.method == "POST":
         user = request.user
         logout(request)
@@ -149,25 +142,20 @@ def delete_profile_view(request):
 
 
 def rate_limit_exceeded(request, exception):
-    """Обробник перевищення ліміту запитів"""
     messages.error(
         request,
         "❌ Забагато невдалих спроб. Зачекайте 1 хвилину перед наступною спробою.",
     )
-    # Повертаємо на ту ж сторінку
     return redirect(request.META.get("HTTP_REFERER", "usersed:login"))
 
 
 def handler403(request, exception=None):
-    """Обробник помилки 403 Forbidden"""
     return render(request, "403.html", status=403)
 
 
 def handler404(request, exception=None):
-    """Обробник помилки 404 Not Found"""
     return render(request, "404.html", status=404)
 
 
 def handler500(request):
-    """Обробник помилки 500 Internal Server Error"""
     return render(request, "500.html", status=500)

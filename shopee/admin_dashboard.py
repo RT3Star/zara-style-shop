@@ -7,27 +7,22 @@ from usersed.models import CustomUser
 
 
 class DashboardStats:
-    """Клас для збору статистики для дашборду"""
 
     @staticmethod
     def get_stats():
-        """Отримання всієї статистики"""
         today = timezone.now()
         week_ago = today - timedelta(days=7)
         month_ago = today - timedelta(days=30)
 
-        # Загальна статистика
         total_products = Product.objects.filter(is_active=True).count()
         total_categories = Category.objects.filter(is_active=True).count()
         total_users = CustomUser.objects.count()
         total_orders = Order.objects.count()
 
-        # Статистика замовлень
         orders_today = Order.objects.filter(created_at__date=today.date()).count()
         orders_week = Order.objects.filter(created_at__gte=week_ago).count()
         orders_month = Order.objects.filter(created_at__gte=month_ago).count()
 
-        # Сума замовлень
         revenue_today = (
             Order.objects.filter(
                 created_at__date=today.date(), status="delivered"
@@ -47,7 +42,6 @@ class DashboardStats:
             or 0
         )
 
-        # Замовлення за статусами
         orders_by_status = {
             "pending": Order.objects.filter(status="pending").count(),
             "processing": Order.objects.filter(status="processing").count(),
@@ -56,23 +50,18 @@ class DashboardStats:
             "cancelled": Order.objects.filter(status="cancelled").count(),
         }
 
-        # Товари з низьким залишком
         low_stock_products = Product.objects.filter(stock__lt=10, is_active=True)[:10]
 
-        # Популярні товари
         popular_products = Product.objects.filter(is_active=True).order_by(
             "-views_count"
         )[:10]
 
-        # Останні замовлення
         recent_orders = Order.objects.all().order_by("-created_at")[:10]
 
-        # Топ категорій
         top_categories = Category.objects.annotate(
             product_count=Count("products", filter=Q(products__is_active=True))
         ).order_by("-product_count")[:5]
 
-        # Відгуки без відповіді
         unreplied_reviews = Review.objects.filter(
             admin_reply__isnull=True, is_approved=True
         ).count()

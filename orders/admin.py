@@ -96,7 +96,6 @@ class OrderAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     status_badge.short_description = "Статус"
 
     def export_as_csv(self, request, queryset):
-        """Експорт у CSV"""
         import csv
         from django.http import HttpResponse
 
@@ -124,7 +123,6 @@ class OrderAdmin(ExportActionModelAdmin, admin.ModelAdmin):
     export_as_csv.short_description = "Експортувати вибрані у CSV"
 
     def export_as_excel(self, request, queryset):
-        """Експорт у Excel"""
         import openpyxl
         from django.http import HttpResponse
 
@@ -137,13 +135,11 @@ class OrderAdmin(ExportActionModelAdmin, admin.ModelAdmin):
         ws = wb.active
         ws.title = "Замовлення"
 
-        # Заголовки
         headers = ["ID", "Клієнт", "Email", "Телефон", "Сума", "Статус", "Дата"]
         for col, header in enumerate(headers, 1):
             ws.cell(row=1, column=col, value=header)
             ws.cell(row=1, column=col).font = openpyxl.styles.Font(bold=True)
 
-        # Дані
         for row, order in enumerate(queryset, 2):
             ws.cell(row=row, column=1, value=order.id)
             ws.cell(row=row, column=2, value=order.get_full_name())

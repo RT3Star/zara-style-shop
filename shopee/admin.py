@@ -5,7 +5,6 @@ from .models import Category, Product, ProductImage, Review, Size, Color
 
 
 class ProductImageInline(admin.TabularInline):
-    """Вкладені зображення товару"""
 
     model = Product.images.through
     extra = 3
@@ -14,7 +13,6 @@ class ProductImageInline(admin.TabularInline):
 
 
 class ReviewInline(admin.TabularInline):
-    """Вкладені відгуки"""
 
     model = Review
     extra = 0
@@ -26,7 +24,6 @@ class ReviewInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    """Адмін-панель категорій"""
 
     list_display = (
         "name",
@@ -53,7 +50,6 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
     def get_image_preview(self, obj):
-        """Прев'ю зображення"""
         if obj.image:
             return mark_safe(
                 f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />'
@@ -63,7 +59,6 @@ class CategoryAdmin(admin.ModelAdmin):
     get_image_preview.short_description = "Прев'ю"
 
     def product_count(self, obj):
-        """Кількість товарів у категорії"""
         return obj.products.filter(is_active=True).count()
 
     product_count.short_description = "Товарів"
@@ -71,7 +66,6 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Size)
 class SizeAdmin(admin.ModelAdmin):
-    """Адмін-панель розмірів"""
 
     list_display = ("name", "sort_order", "products_count")
     list_editable = ("sort_order",)
@@ -86,7 +80,6 @@ class SizeAdmin(admin.ModelAdmin):
 
 @admin.register(Color)
 class ColorAdmin(admin.ModelAdmin):
-    """Адмін-панель кольорів"""
 
     list_display = ("name", "code", "color_preview", "products_count")
     search_fields = ("name",)
@@ -106,7 +99,6 @@ class ColorAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """Адмін-панель товарів"""
 
     list_display = (
         "name",
@@ -169,7 +161,6 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ReviewInline]
 
     def get_image_preview(self, obj):
-        """Прев'ю головного зображення"""
         if obj.image:
             return mark_safe(
                 f'<img src="{obj.image.url}" width="50" height="50" style="object-fit: cover;" />'
@@ -179,7 +170,6 @@ class ProductAdmin(admin.ModelAdmin):
     get_image_preview.short_description = "Прев'ю"
 
     def current_price_display(self, obj):
-        """Відображення поточної ціни"""
         from django.utils.html import format_html
 
         if obj.discount_price:
@@ -193,7 +183,6 @@ class ProductAdmin(admin.ModelAdmin):
     current_price_display.short_description = "Поточна ціна"
 
     def discount_percent_display(self, obj):
-        """Відображення відсотка знижки"""
         if obj.discount_price:
             percent = int((1 - obj.discount_price / obj.price) * 100)
             return f"-{percent}%"
@@ -202,7 +191,6 @@ class ProductAdmin(admin.ModelAdmin):
     discount_percent_display.short_description = "Знижка"
 
     def average_rating_display(self, obj):
-        """Відображення середнього рейтингу"""
         rating = obj.average_rating
         if rating:
             return f"⭐ {rating:.1f} / 5 ({obj.reviews_count} відгуків)"
@@ -211,9 +199,7 @@ class ProductAdmin(admin.ModelAdmin):
     average_rating_display.short_description = "Рейтинг"
 
     def save_model(self, request, obj, form, change):
-        """При збереженні товару"""
         super().save_model(request, obj, form, change)
-        # Оновлюємо is_new якщо товар молодший 30 днів
         from django.utils import timezone
         from datetime import timedelta
 
@@ -224,7 +210,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    """Адмін-панель відгуків"""
 
     list_display = (
         "product",
@@ -246,7 +231,6 @@ class ReviewAdmin(admin.ModelAdmin):
     )
 
     def comment_preview(self, obj):
-        """Прев'ю коментаря"""
         return obj.comment[:50] + "..." if len(obj.comment) > 50 else obj.comment
 
     comment_preview.short_description = "Коментар"
@@ -254,7 +238,6 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    """Адмін-панель зображень"""
 
     list_display = ("id", "get_image_preview", "alt_text", "created_at")
     list_filter = ("created_at",)

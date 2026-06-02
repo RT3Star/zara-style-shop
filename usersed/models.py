@@ -5,14 +5,12 @@ from django.dispatch import receiver
 
 
 class CustomUser(AbstractUser):
-    """Розширена модель користувача для магазину одягу"""
 
     phone = models.CharField(
         max_length=20, blank=True, null=True, verbose_name="Телефон"
     )
     address = models.TextField(blank=True, null=True, verbose_name="Адреса")
 
-    # Додаткові поля для магазину одягу
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Місто")
     postal_code = models.CharField(
         max_length=10, blank=True, null=True, verbose_name="Поштовий індекс"
@@ -27,7 +25,6 @@ class CustomUser(AbstractUser):
         return self.username
 
     def get_full_name(self):
-        """Повертає повне ім'я або username"""
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.username
@@ -37,7 +34,6 @@ class CustomUser(AbstractUser):
         return self.orders.filter(status="delivered").count()
 
     def get_total_spent(self):
-        """Сума всіх замовлень користувача"""
         return (
             self.orders.filter(status="delivered").aggregate(
                 total=models.Sum("total_price")
@@ -47,7 +43,6 @@ class CustomUser(AbstractUser):
 
 
 class UserProfile(models.Model):
-    """Профіль користувача (додаткова інформація)"""
 
     GENDER_CHOICES = [
         ("M", "Чоловіча"),
@@ -74,7 +69,6 @@ class UserProfile(models.Model):
         verbose_name="Стать",
     )
 
-    # Налаштування сповіщень
     newsletter_subscription = models.BooleanField(
         default=False, verbose_name="Підписка на новини"
     )
@@ -94,7 +88,6 @@ class UserProfile(models.Model):
 
     @property
     def age(self):
-        """Обчислює вік користувача"""
         if self.birth_date:
             from datetime import date
 
@@ -110,16 +103,13 @@ class UserProfile(models.Model):
         return None
 
 
-# Сигнали для автоматичного створення профілю
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Автоматично створює профіль при реєстрації користувача"""
     if created:
         UserProfile.objects.create(user=instance)
 
 
 @receiver(post_save, sender=CustomUser)
 def save_user_profile(sender, instance, **kwargs):
-    """Автоматично зберігає профіль при збереженні користувача"""
     if hasattr(instance, "profile"):
         instance.profile.save()

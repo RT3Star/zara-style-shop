@@ -14,15 +14,12 @@ from .email import send_order_confirmation_email, send_order_status_update_email
 
 @ratelimit(key="ip", rate="5/m", method="POST")
 def order_create_view(request):
-    """Створення замовлення (для всіх користувачів)"""
 
-    # Перевірка на обмеження частоти
     was_limited = getattr(request, "limited", False)
     if was_limited and request.method == "POST":
         messages.error(request, "Забагато спроб. Зачекайте трохи.")
         return redirect("cart:cart_detail")
 
-    # Отримуємо кошик
     if request.user.is_authenticated:
         cart = Cart.objects.filter(user=request.user).first()
     else:
@@ -157,7 +154,6 @@ def order_create_view(request):
 
 @login_required
 def order_detail_view(request, order_id):
-    """Деталі замовлення"""
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     context = {
@@ -171,7 +167,6 @@ def order_detail_view(request, order_id):
 
 @login_required
 def order_list_view(request):
-    """Список замовлень користувача"""
     orders = Order.objects.filter(user=request.user).order_by("-created_at")
 
     paginator = Paginator(orders, 10)
@@ -186,7 +181,6 @@ def order_list_view(request):
 
 @login_required
 def order_cancel_view(request, order_id):
-    """Скасування замовлення"""
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     if order.status in ["pending", "processing"]:
@@ -212,7 +206,6 @@ def order_cancel_view(request, order_id):
 
 @login_required
 def order_repeat_view(request, order_id):
-    """Повторити замовлення (додати всі товари в кошик)"""
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -239,7 +232,6 @@ def order_repeat_view(request, order_id):
 
 @login_required
 def order_tracking_view(request, order_id):
-    """Відстеження замовлення"""
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     tracking_steps = [

@@ -4,9 +4,7 @@ from shopee.models import Product
 
 
 class Order(models.Model):
-    """Модель замовлення"""
 
-    # Статуси замовлення
     STATUS_CHOICES = [
         ("pending", "🟡 Очікує оплати"),
         ("processing", "🔵 В обробці"),
@@ -16,21 +14,18 @@ class Order(models.Model):
         ("refunded", "🔄 Повернуто"),
     ]
 
-    # Спосіб оплати
     PAYMENT_CHOICES = [
         ("cash", "Готівка при отриманні"),
         ("card", "Карткою онлайн"),
         ("bank", "Банківський переказ"),
     ]
 
-    # Спосіб доставки
     DELIVERY_CHOICES = [
         ("nova_poshta", "Нова Пошта"),
         ("ukrposhta", "Укрпошта"),
         ("courier", "Кур'єром по місту"),
     ]
 
-    # Особиста інформація
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -43,14 +38,12 @@ class Order(models.Model):
     email = models.EmailField(verbose_name="Email")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
 
-    # Адреса доставки
     address = models.TextField(verbose_name="Адреса")
     city = models.CharField(max_length=100, verbose_name="Місто")
     postal_code = models.CharField(
         max_length=20, blank=True, verbose_name="Поштовий індекс"
     )
 
-    # Доставка
     delivery_method = models.CharField(
         max_length=20,
         choices=DELIVERY_CHOICES,
@@ -64,7 +57,6 @@ class Order(models.Model):
         max_length=100, blank=True, null=True, verbose_name="Трек-номер"
     )
 
-    # Оплата
     payment_method = models.CharField(
         max_length=20,
         choices=PAYMENT_CHOICES,
@@ -74,7 +66,6 @@ class Order(models.Model):
     is_paid = models.BooleanField(default=False, verbose_name="Оплачено")
     paid_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата оплати")
 
-    # Фінанси
     subtotal = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name="Сума без доставки"
     )
@@ -82,12 +73,11 @@ class Order(models.Model):
         max_digits=10, decimal_places=2, verbose_name="Загальна сума"
     )
 
-    # Статус
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="pending", verbose_name="Статус"
     )
 
-    # Коментарі
+
     comment = models.TextField(
         blank=True, null=True, verbose_name="Коментар до замовлення"
     )
@@ -95,7 +85,6 @@ class Order(models.Model):
         blank=True, null=True, verbose_name="Коментар адміністратора"
     )
 
-    # Дати
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Створено")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
 
@@ -111,7 +100,6 @@ class Order(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     def get_status_badge(self):
-        """Повертає HTML бейдж для статусу"""
         badges = {
             "pending": "warning",
             "processing": "info",
@@ -123,7 +111,6 @@ class Order(models.Model):
         return badges.get(self.status, "secondary")
 
     def get_status_emoji(self):
-        """Повертає емодзі для статусу"""
         emojis = {
             "pending": "🟡",
             "processing": "🔵",
@@ -136,7 +123,6 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    """Модель товару в замовленні"""
 
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="items", verbose_name="Замовлення"
@@ -148,14 +134,12 @@ class OrderItem(models.Model):
         verbose_name="Товар",
     )
 
-    # Характеристики товару на момент замовлення
     product_name = models.CharField(max_length=200, verbose_name="Назва товару")
     product_price = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name="Ціна"
     )
     quantity = models.PositiveIntegerField(default=1, verbose_name="Кількість")
 
-    # Опції для одягу
     size = models.CharField(max_length=10, blank=True, null=True, verbose_name="Розмір")
     color = models.CharField(max_length=50, blank=True, null=True, verbose_name="Колір")
 
@@ -169,5 +153,4 @@ class OrderItem(models.Model):
         return f"{self.product_name} x {self.quantity}"
 
     def total_price(self):
-        """Вартість позиції"""
         return self.product_price * self.quantity

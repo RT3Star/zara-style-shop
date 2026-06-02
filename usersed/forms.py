@@ -7,7 +7,6 @@ User = get_user_model()
 
 
 class UserRegistrationForm(UserCreationForm):
-    """Форма реєстрації з додатковими полями"""
 
     email = forms.EmailField(
         required=True, widget=forms.EmailInput(attrs={"class": "form-control"})
@@ -47,8 +46,7 @@ class UserRegistrationForm(UserCreationForm):
 
         if commit:
             user.save()
-            # Профіль створиться автоматично через сигнал
-            # Якщо з якоїсь причини не створився - створюємо вручну
+
             if not hasattr(user, "profile"):
                 UserProfile.objects.create(user=user)
 
@@ -56,7 +54,6 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class UserUpdateForm(forms.ModelForm):
-    """Форма оновлення даних користувача"""
 
     email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control"}))
     first_name = forms.CharField(
@@ -105,7 +102,6 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.ModelForm):
-    """Форма оновлення профілю (тільки поля з UserProfile)"""
 
     class Meta:
         model = UserProfile

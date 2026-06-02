@@ -5,7 +5,6 @@ from .models import Order, OrderItem
 
 
 class OrderItemResource(resources.ModelResource):
-    """Ресурс для експорту товарів замовлення"""
 
     product_name = Field(attribute="product_name", column_name="Назва товару")
     quantity = Field(attribute="quantity", column_name="Кількість")
@@ -19,7 +18,6 @@ class OrderItemResource(resources.ModelResource):
 
 
 class OrderResource(resources.ModelResource):
-    """Ресурс для експорту замовлень"""
 
     order_id = Field(attribute="id", column_name="№ Замовлення")
     customer_name = Field(attribute="get_full_name", column_name="Клієнт")

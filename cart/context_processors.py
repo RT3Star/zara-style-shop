@@ -2,7 +2,6 @@ from .models import Cart
 
 
 def cart_context(request):
-    """Контекстний процесор для кошика - доступний на всіх сторінках"""
     cart = None
     cart_count = 0
     cart_total = 0

@@ -41,7 +41,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         "gender",
         "birth_date",
         "newsletter_subscription",
-    )  # city прибрано
+    )
     list_filter = ("gender", "newsletter_subscription", "created_at")
     search_fields = ("user__username", "user__email")
     readonly_fields = ("created_at", "updated_at", "display_avatar")
@@ -57,7 +57,6 @@ class UserProfileAdmin(admin.ModelAdmin):
     )
 
     def get_avatar(self, obj):
-        """Відображає мініатюру аватарки в списку"""
         if obj.avatar:
             return mark_safe(
                 f'<img src="{obj.avatar.url}" width="50" height="50" style="border-radius: 50%;" />'
@@ -67,7 +66,6 @@ class UserProfileAdmin(admin.ModelAdmin):
     get_avatar.short_description = "Аватар"
 
     def display_avatar(self, obj):
-        """Відображає велику аватарку в деталях"""
         if obj.avatar:
             return mark_safe(
                 f'<img src="{obj.avatar.url}" width="150" height="150" style="border-radius: 50%;" />'

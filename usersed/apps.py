@@ -6,4 +6,4 @@ class UsersedConfig(AppConfig):
     name = "usersed"
 
     def ready(self):
-        import usersed.signals  # реєструємо сигнали
+        import usersed.signals

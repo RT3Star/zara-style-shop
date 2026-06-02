@@ -1,8 +1,3 @@
-/* ========================================
-   ZARA STYLE - Інтерактивні елементи
-   Інтеграція з Django проектом
-   ======================================== */
-
 // Зникаюче меню при скролі
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('siteHeader');
@@ -184,7 +179,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ===== ОДИН ОБРОБНИК ДЛЯ ВСІХ КНОПОК (ВИПРАВЛЕНО) =====
+// ===== ОДИН ОБРОБНИК ДЛЯ ВСІХ КНОПОК =====
 document.addEventListener('DOMContentLoaded', function() {
     // ЄДИНИЙ обробник через делегування
     document.body.addEventListener('click', function(e) {
