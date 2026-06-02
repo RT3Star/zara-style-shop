@@ -17,7 +17,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 from decouple import config
 import os
-import dj_database_url
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -32,7 +31,6 @@ CSRF_TRUSTED_ORIGINS = [
     'https://zara-style-shop-production.up.railway.app',
     'http://zara-style-shop-production.up.railway.app',
 ]
-
 
 ALLOWED_HOSTS = ['*']
 
@@ -100,29 +98,18 @@ DATABASES = {
 }
 
 # Налаштування для SQLite щоб уникнути блокування бази даних
-# Це вирішує помилку "database is locked"
 DATABASES["default"]["OPTIONS"] = {
-    "timeout": 20,  # Чекаємо до 20 секунд замість 5
-    "transaction_mode": "IMMEDIATE",  # Режим транзакцій
+    "timeout": 20,
+    "transaction_mode": "IMMEDIATE",
 }
 
 
-# ========== НАЛАШТУВАННЯ КЕШУВАННЯ (Redis через Memurai) ==========
-# Встановіть Memurai: https://www.memurai.com/get-memurai
-# Встановіть бібліотеку: pip install django-redis
-
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')  # ← прибрано пароль
-
+# ========== НАЛАШТУВАННЯ КЕШУВАННЯ (вимкнено Redis для Railway) ==========
+# Тимчасово використовуємо локальне кешування замість Redis
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://:{REDIS_PASSWORD}@redis:6379/1' if REDIS_PASSWORD else 'redis://redis:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'PASSWORD': REDIS_PASSWORD,
-        },
-        'KEY_PREFIX': 'zara_shop',
-        'TIMEOUT': 300,
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
@@ -166,16 +153,14 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-
-
 STATIC_ROOT = '/app/staticfiles'
+
+# Media files
+MEDIA_URL = "/media/"
 MEDIA_VOLUME_PATH = os.getenv('MEDIA_VOLUME_PATH', os.path.join(BASE_DIR, 'media'))
-MEDIA_URL = '/media/'
 MEDIA_ROOT = MEDIA_VOLUME_PATH
 
 DEFAULT_PRODUCT_IMAGE = 'https://placehold.co/600x800/e0e0e0/333?text=No+Image'
-
-MEDIA_URL = "/media/"
 
 
 # Custom user model
@@ -196,8 +181,9 @@ EMAIL_HOST_USER = "romaxa21023636@gmail.com"
 EMAIL_HOST_PASSWORD = "goggog-8faXdi-kybtib"
 DEFAULT_FROM_EMAIL = "romaxa21023636@gmail.com"
 
-if 'DATABASE_URL' in os.environ and os.environ.get('DISABLE_DATABASE_ENV') != '1':
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
-    }
+
+# ========== ВИМИКАЄМО POSTGRESQL НА RAILWAY ==========
+# Якщо Railway додав DATABASE_URL - ігноруємо його
+if 'DATABASE_URL' in os.environ:
+    # Видаляємо змінну, щоб Django використовував SQLite
+    del os.environ['DATABASE_URL']
