@@ -172,9 +172,11 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-if not DEBUG:
-    STATIC_ROOT = '/app/staticfiles'
-    MEDIA_ROOT = '/app/media'
+
+STATIC_ROOT = '/app/staticfiles'
+MEDIA_VOLUME_PATH = os.getenv('MEDIA_VOLUME_PATH', os.path.join(BASE_DIR, 'media'))
+MEDIA_ROOT = MEDIA_VOLUME_PATH
+MEDIA_URL = '/media/'
 
 DEFAULT_PRODUCT_IMAGE = 'https://placehold.co/600x800/e0e0e0/333?text=No+Image'
 
