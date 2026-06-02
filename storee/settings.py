@@ -105,10 +105,23 @@ DATABASES["default"]["OPTIONS"] = {
 # Встановіть Memurai: https://www.memurai.com/get-memurai
 # Встановіть бібліотеку: pip install django-redis
 
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', 'EOGbBFTatWrqWwQlxCqVVgAhABWGXdmd')
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',
+        'LOCATION': f'redis://:{REDIS_PASSWORD}@redis:6379/1' if REDIS_PASSWORD else 'redis://redis:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+            'CONNECTION_POOL_CLASS_KWARGS': {
+                'max_connections': 50,
+                'timeout': 20,
+            },
+            'PASSWORD': REDIS_PASSWORD,  # Додаємо пароль
+        },
+        'KEY_PREFIX': 'zara_shop',
+        'TIMEOUT': 300,
     }
 }
 
