@@ -111,7 +111,7 @@ DATABASES["default"]["OPTIONS"] = {
 # Встановіть Memurai: https://www.memurai.com/get-memurai
 # Встановіть бібліотеку: pip install django-redis
 
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', 'EOGbBFTatWrqWwQlxCqVVgAhABWGXdmd')
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')  # ← прибрано пароль
 
 CACHES = {
     'default': {
@@ -119,12 +119,7 @@ CACHES = {
         'LOCATION': f'redis://:{REDIS_PASSWORD}@redis:6379/1' if REDIS_PASSWORD else 'redis://redis:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
-            'CONNECTION_POOL_CLASS_KWARGS': {
-                'max_connections': 50,
-                'timeout': 20,
-            },
-            'PASSWORD': REDIS_PASSWORD,  # Додаємо пароль
+            'PASSWORD': REDIS_PASSWORD,
         },
         'KEY_PREFIX': 'zara_shop',
         'TIMEOUT': 300,
@@ -175,8 +170,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 STATIC_ROOT = '/app/staticfiles'
 MEDIA_VOLUME_PATH = os.getenv('MEDIA_VOLUME_PATH', os.path.join(BASE_DIR, 'media'))
-MEDIA_ROOT = MEDIA_VOLUME_PATH
 MEDIA_URL = '/media/'
+MEDIA_ROOT = MEDIA_VOLUME_PATH
 
 DEFAULT_PRODUCT_IMAGE = 'https://placehold.co/600x800/e0e0e0/333?text=No+Image'
 
@@ -201,7 +196,8 @@ EMAIL_HOST_USER = "romaxa21023636@gmail.com"
 EMAIL_HOST_PASSWORD = "goggog-8faXdi-kybtib"
 DEFAULT_FROM_EMAIL = "romaxa21023636@gmail.com"
 
-if 'DATABASE_URL' in os.environ:
+if 'DATABASE_URL' in os.environ and os.environ.get('DISABLE_DATABASE_ENV') != '1':
+    import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
     }
