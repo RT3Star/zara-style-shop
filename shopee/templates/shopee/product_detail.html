@@ -105,7 +105,9 @@
       <div class="products-grid">
         {% for rec in recommendations %}
         <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' rec.slug %}'">
-          <img class="product-img" src="{{ rec.image.url }}" alt="{{ rec.name }}">
+          <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ product.name|urlencode }}{% endif %}"
+              alt="{{ product.name }}"
+              style="width: 100%; height: auto;">
           <div class="product-info">
             <div class="product-title">{{ rec.name|truncatechars:35 }}</div>
             <div class="product-price">{{ rec.price }} ₴</div>

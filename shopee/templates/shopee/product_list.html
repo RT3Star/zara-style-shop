@@ -66,7 +66,7 @@
         <div class="product-card" onclick="location.href='{% url 'shopee:product_detail' product.slug %}'">
           <img class="product-img"
                src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x800/e0e0e0/333?text={{ product.name|urlencode }}{% endif %}"
-               alt="{{ product.name }}">
+               alt="{{ product.name }}"
                loading="lazy">
           {% if product.discount_price %}
           <div class="sale-badge">-{{ product.discount_percent }}%</div>
