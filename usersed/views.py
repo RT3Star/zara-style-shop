@@ -19,16 +19,31 @@ from django.core.exceptions import PermissionDenied
 from django_ratelimit.exceptions import Ratelimited
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
+import time
 
-@ratelimit(key="ip", rate="5/m", method="POST", block=True)
+
+
+def check_rate_limit(request, key, limit=5, period=60):
+
+    cache_key = f'rate_limit_{key}'
+    attempts = cache.get(cache_key, 0)
+
+    if attempts >= limit:
+        return False
+
+    cache.set(cache_key, attempts + 1, period)
+    return True
+
+
 def register_view(request):
 
-    if getattr(request, 'limited', False):
-        messages.error(request, 'Забагато спроб. Зачекайте.')
+    ip = request.META.get('REMOTE_ADDR')
+    if not check_rate_limit(request, f'register_{ip}', limit=5, period=60):
+        messages.error(request, '❌ Забагато спроб реєстрації. Зачекайте 1 хвилину.')
         return redirect('usersed:register')
 
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect('home')
 
     if request.method == "POST":
         form = UserRegistrationForm(request.POST)
@@ -36,39 +51,39 @@ def register_view(request):
             try:
                 user = form.save()
                 login(request, user)
-                messages.success(
-                    request, f"Вітаємо, {user.username}! Ви успішно зареєструвалися."
-                )
+                messages.success(request, f'Вітаємо, {user.username}! Ви успішно зареєструвалися.')
                 return redirect("home")
             except IntegrityError:
-                messages.error(
-                    request, "Помилка при створенні профілю. Спробуйте ще раз."
-                )
+                messages.error(request, 'Помилка при створенні профілю.')
                 form = UserRegistrationForm()
         else:
-            messages.error(request, "Будь ласка, виправте помилки у формі.")
+            messages.error(request, 'Будь ласка, виправте помилки у формі.')
     else:
         form = UserRegistrationForm()
 
     return render(request, "usersed/register.html", {"form": form})
 
 
-@ratelimit(key="ip", rate="10/m", method="POST", block=True)
 def login_view(request):
 
+    ip = request.META.get('REMOTE_ADDR')
+    if not check_rate_limit(request, f'login_{ip}', limit=10, period=60):
+        messages.error(request, '❌ Забагато спроб входу. Зачекайте 1 хвилину.')
+        return redirect('usersed:login')
+
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect('home')
 
     if request.method == "POST":
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, f"Ласкаво просимо назад, {user.username}!")
-            next_url = request.GET.get("next", "home")
+            messages.success(request, f'Ласкаво просимо назад, {user.username}!')
+            next_url = request.GET.get('next', 'home')
             return redirect(next_url)
         else:
-            messages.error(request, "Неправильне ім'я користувача або пароль.")
+            messages.error(request, 'Неправильне ім\'я користувача або пароль.')
     else:
         form = AuthenticationForm()
 
