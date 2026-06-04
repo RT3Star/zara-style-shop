@@ -43,52 +43,15 @@ def register_view(request):
         messages.error(request, '❌ Забагато спроб реєстрації. Зачекайте 1 хвилину.')
         return redirect('usersed:register')
 
-    if request.user.is_authenticated:
-        return redirect('home')
-
-    if request.method == "POST":
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            try:
-                user = form.save()
-                login(request, user)
-                messages.success(request, f'Вітаємо, {user.username}! Ви успішно зареєструвалися.')
-                return redirect("home")
-            except IntegrityError:
-                messages.error(request, 'Помилка при створенні профілю.')
-                form = UserRegistrationForm()
-        else:
-            messages.error(request, 'Будь ласка, виправте помилки у формі.')
-    else:
-        form = UserRegistrationForm()
-
-    return render(request, "usersed/register.html", {"form": form})
 
 
 def login_view(request):
 
     ip = request.META.get('REMOTE_ADDR')
-    if not check_rate_limit(request, f'login_{ip}', limit=10, period=60):
+    if not check_rate_limit(request, f'login_{ip}', limit=5, period=60):
         messages.error(request, '❌ Забагато спроб входу. Зачекайте 1 хвилину.')
         return redirect('usersed:login')
 
-    if request.user.is_authenticated:
-        return redirect('home')
-
-    if request.method == "POST":
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, f'Ласкаво просимо назад, {user.username}!')
-            next_url = request.GET.get('next', 'home')
-            return redirect(next_url)
-        else:
-            messages.error(request, 'Неправильне ім\'я користувача або пароль.')
-    else:
-        form = AuthenticationForm()
-
-    return render(request, "usersed/login.html", {"form": form})
 
 
 def logout_view(request):
