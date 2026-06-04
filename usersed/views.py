@@ -24,9 +24,10 @@ import time
 
 
 def check_rate_limit(request, key, limit=5, period=60):
-
+    print(f"CHECKING RATE LIMIT: {key}")
     cache_key = f'rate_limit_{key}'
     attempts = cache.get(cache_key, 0)
+    print(f"Attempts: {attempts}")
 
     if attempts >= limit:
         return False
