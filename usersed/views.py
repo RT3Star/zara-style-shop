@@ -20,9 +20,12 @@ from django_ratelimit.exceptions import Ratelimited
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 
-
 @ratelimit(key="ip", rate="5/m", method="POST", block=True)
 def register_view(request):
+
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Забагато спроб. Зачекайте.')
+        return redirect('usersed:register')
 
     if request.user.is_authenticated:
         return redirect("home")
@@ -142,11 +145,8 @@ def delete_profile_view(request):
 
 
 def rate_limit_exceeded(request, exception):
-    messages.error(
-        request,
-        "❌ Забагато невдалих спроб. Зачекайте 1 хвилину перед наступною спробою.",
-    )
-    return redirect(request.META.get("HTTP_REFERER", "usersed:login"))
+    messages.error(request, '❌ Забагато спроб. Зачекайте 1 хвилину.')
+    return redirect(request.META.get('HTTP_REFERER', 'usersed:login'))
 
 
 def handler403(request, exception=None):
