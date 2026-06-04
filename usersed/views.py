@@ -19,7 +19,7 @@ import time
 
 
 def check_rate_limit(request, key, limit=5, period=60):
-    """Перевірка ліміту запитів"""
+
     print(f"CHECKING RATE LIMIT: {key}")
     cache_key = f'rate_limit_{key}'
     attempts = cache.get(cache_key, 0)
@@ -33,11 +33,11 @@ def check_rate_limit(request, key, limit=5, period=60):
 
 
 def register_view(request):
-    """Реєстрація нового користувача"""
 
-    # Rate limiting за IP
     ip = request.META.get('REMOTE_ADDR')
-    if not check_rate_limit(request, f'register_{ip}', limit=5, period=60):
+    is_allowed = check_rate_limit(request, f'register_{ip}', limit=5, period=60)
+
+    if not is_allowed:
         messages.error(request, '❌ Забагато спроб реєстрації. Зачекайте 1 хвилину.')
         return redirect('usersed:register')
 
@@ -64,9 +64,7 @@ def register_view(request):
 
 
 def login_view(request):
-    """Вхід користувача"""
 
-    # Rate limiting за IP
     ip = request.META.get('REMOTE_ADDR')
     if not check_rate_limit(request, f'login_{ip}', limit=5, period=60):
         messages.error(request, '❌ Забагато спроб входу. Зачекайте 1 хвилину.')
